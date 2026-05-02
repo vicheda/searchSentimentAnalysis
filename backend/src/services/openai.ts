@@ -2,7 +2,7 @@ import OpenAI from "openai";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const systemPrompt = `You are a helpful assistant. Answer the user's question naturally and conversationally.`;
+const systemPrompt = `You are a helpful assistant. Answer the user's question naturally and conversationally. When the prompt involves product or brand recommendations, factor in public review language, forum chatter, and current online sentiment when relevant.`;
 
 export async function extractBrands(responseText: string): Promise<string[]> {
   const prompt = `Extract all shoe or apparel brand names mentioned in the following text. Return ONLY a JSON array of brand name strings (e.g., ["Nike", "Brooks", "Adidas"]). Use proper capitalization. If no brands are found, return [].
@@ -41,7 +41,7 @@ export async function llmSentimentScore(
   brand: string,
   passage: string
 ): Promise<{ score: number; label: string; attributes: Array<{ text: string; sentiment: string }> }> {
-  const prompt = `Analyze the sentiment of the following passage about "${brand}" in the context of running shoes.
+  const prompt = `Analyze the sentiment of the following passage about "${brand}" in the context of running shoes. Use the passage together with likely public review language and online discussion patterns when relevant.
 
 Passage: "${passage}"
 
@@ -50,7 +50,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no explanation:
   "score": <number between -1.0 and 1.0>,
   "label": "<positive|negative|neutral|mixed>",
   "attributes": [
-    { "text": "<attribute>", "sentiment": "<positive|negative|neutral>" }
+    { "text": "<sentiment quality/characteristic like comfort, durability, weight, support, cushioning - NOT product names>", "sentiment": "<positive|negative|neutral>" }
   ]
 }`;
 

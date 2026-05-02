@@ -25,6 +25,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [streamedText, setStreamedText] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [showResponse, setShowResponse] = useState(false);
   const streamTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -64,6 +65,7 @@ export default function App() {
     setCurrent(null);
     setStreamedText("");
     setIsStreaming(false);
+    setShowResponse(false);
 
     try {
       const sim = await runSimulation(prompt);
@@ -83,6 +85,7 @@ export default function App() {
     setCurrent(sim);
     setStreamedText(sim.rawResponse);
     setIsStreaming(false);
+    setShowResponse(false);
   };
 
   // ── HOME ──────────────────────────────────────────────────────────────────
@@ -154,34 +157,46 @@ export default function App() {
       {error && <div className="error-banner">{error}</div>}
 
       <div className="results-layout">
-        {/* LEFT — AI response */}
+        {/* LEFT — brand analysis */}
         <div className="results-left">
           {current && (
             <p className="results-query">"{current.prompt}"</p>
           )}
-          {loading && !streamedText && (
+          {loading && !current && (
             <div className="thinking-dots"><span /><span /><span /></div>
           )}
-          {streamedText && (
-            <div className="response-prose">
-              <p className="response-text">{streamedText}</p>
-              {isStreaming && <span className="stream-cursor">▋</span>}
+          {!loading && current && (
+            <div className="panel-card panel-main-card">
+              <div className="panel-label">Brand Analysis</div>
+              <SimulationResults simulation={current} />
             </div>
           )}
         </div>
 
-        {/* RIGHT — knowledge panel */}
+        {/* RIGHT — AI response */}
         <div className="results-right">
-          {(loading || isStreaming) && (
+          {(loading || (!current && isStreaming)) && (
             <div className="panel-card panel-loading">
               <div className="thinking-dots"><span /><span /><span /></div>
               <span className="panel-loading-label">Analyzing brands…</span>
             </div>
           )}
-          {!isStreaming && current && (
+          {!loading && current && (
             <div className="panel-card">
-              <div className="panel-label">Brand Analysis</div>
-              <SimulationResults simulation={current} />
+              <div className="panel-label">AI Response</div>
+              <button
+                className="toggle-response-btn"
+                onClick={() => setShowResponse(prev => !prev)}
+              >
+                {showResponse ? "Hide AI response" : "Show AI response"}
+              </button>
+              {showResponse && (
+                <div className="response-prose response-prose-card">
+                  <p className="response-text">{streamedText || current.rawResponse}</p>
+                  {isStreaming && <span className="stream-cursor">▋</span>}
+                </div>
+              )}
+              {!showResponse && null}
             </div>
           )}
         </div>

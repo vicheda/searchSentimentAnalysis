@@ -46,7 +46,7 @@ function BrooksSummary({ simulations }: { simulations: Simulation[] }) {
 
   return (
     <div className="brooks-summary">
-      <div className="summary-title">Brooks — Performance Summary</div>
+      <div className="summary-title">Brooks Performance Summary</div>
 
       <div className="summary-stats">
         <div className="summary-stat">
