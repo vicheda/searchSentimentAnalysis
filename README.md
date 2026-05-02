@@ -1,4 +1,4 @@
-# AI Sentiment Intelligence Platform
+# AI Search Sentiment Analysis
 **Brooks Running · Competitive Analysis · v1.0**
 
 ---
@@ -57,21 +57,11 @@ surfaced in the UI.
 | Backend  | Node.js + TypeScript |
 | Database | PostgreSQL         |
 
----
-
-## Where to Spend Your Time
-
-> **Backend logic is the priority.** The algorithm you design for parsing,
-> scoring, and ranking AI search results is what matters most.
-> Frontend polish is secondary — functional, not perfect.
-> Estimated time: 4–6 hours.
-
----
 
 ## Key Implementation Notes
 
-- Use the OpenAI Responses API; **model name must not be exposed to the frontend**
-- Simulate a real user querying ChatGPT — do not scrape the live website
+- Use the OpenAI Responses API
+- Simulate a real user querying ChatGPT (do not scrape the live website)
 - **Document your algorithm**: explain how and why you score sentiment the way you do
 - Visibility = string match on brand names in the AI response body
 - Sentiment = attribute extraction + scoring on brand-specific passages

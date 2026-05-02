@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Simulation {
+  id           String        @id @default(uuid())
+  prompt       String
+  rawResponse  String
+  createdAt    DateTime      @default(now())
+  brandResults BrandResult[]
+}
+
+model BrandResult {
+  id                 String           @id @default(uuid())
+  simulationId       String
+  simulation         Simulation       @relation(fields: [simulationId], references: [id])
+  brandName          String
+  isVisible          Boolean
+  mentionCount       Int              @default(0)
+  firstMentionIndex  Int?
+  sentimentScore     Float?
+  sentimentLabel     String?
+  scoringMethod      String?
+  attributes         BrandAttribute[]
+}
+
+model BrandAttribute {
+  id            String      @id @default(uuid())
+  brandResultId String
+  brandResult   BrandResult @relation(fields: [brandResultId], references: [id])
+  text          String
+  sentiment     String
+}
