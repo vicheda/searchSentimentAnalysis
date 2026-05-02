@@ -4,6 +4,27 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const systemPrompt = `You are a helpful assistant. Answer the user's question naturally and conversationally.`;
 
+export async function extractBrands(responseText: string): Promise<string[]> {
+  const prompt = `Extract all shoe or apparel brand names mentioned in the following text. Return ONLY a JSON array of brand name strings (e.g., ["Nike", "Brooks", "Adidas"]). Use proper capitalization. If no brands are found, return [].
+
+Text:
+${responseText}`;
+
+  const response = await openai.chat.completions.create({
+    model: process.env.OPENAI_MODEL!,
+    messages: [{ role: "user", content: prompt }],
+    max_completion_tokens: 150
+  });
+
+  try {
+    const raw = response.choices[0].message.content || "[]";
+    const parsed = JSON.parse(raw.replace(/```json|```/g, "").trim());
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function callOpenAI(userPrompt: string): Promise<string> {
   const response = await openai.chat.completions.create({
     model: process.env.OPENAI_MODEL!,
@@ -36,7 +57,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no explanation:
   const response = await openai.chat.completions.create({
     model: process.env.OPENAI_MODEL!,
     messages: [{ role: "user", content: prompt }],
-    max_tokens: 300
+    max_completion_tokens: 300
   });
 
   const raw = response.choices[0].message.content || "{}";

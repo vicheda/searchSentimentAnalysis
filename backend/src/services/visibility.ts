@@ -1,4 +1,4 @@
-const BRANDS = ["Brooks", "Nike", "Adidas", "Hoka"];
+import { extractBrands } from "./openai";
 
 export interface VisibilityResult {
   brandName: string;
@@ -7,9 +7,12 @@ export interface VisibilityResult {
   firstMentionIndex: number | null;
 }
 
-export function checkVisibility(responseText: string): VisibilityResult[] {
-  return BRANDS.map(brand => {
-    const regex = new RegExp(brand, "gi");
+export async function checkVisibility(responseText: string): Promise<VisibilityResult[]> {
+  const brands = await extractBrands(responseText);
+
+  return brands.map(brand => {
+    const escaped = brand.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`\\b${escaped}\\b`, "gi");
     const matches = [...responseText.matchAll(regex)];
     const firstIndex = matches.length > 0 ? matches[0].index ?? null : null;
 

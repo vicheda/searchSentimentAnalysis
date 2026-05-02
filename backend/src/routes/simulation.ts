@@ -14,7 +14,7 @@ router.post("/", async (req, res) => {
     }
 
     const rawResponse = await callOpenAI(prompt);
-    const visibilityResults = checkVisibility(rawResponse);
+    const visibilityResults = await checkVisibility(rawResponse);
 
     const brandResults = await Promise.all(
       visibilityResults.map(async (v) => {
