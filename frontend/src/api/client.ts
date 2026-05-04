@@ -36,3 +36,6 @@ export const getSimulations = () =>
 
 export const getSimulation = (id: string) =>
   api.get<Simulation>(`/simulations/${id}`).then(r => r.data);
+
+export const deleteSimulation = (id: string) =>
+  api.delete(`/simulations/${id}`).then(r => r.data);

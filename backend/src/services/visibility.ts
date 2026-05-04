@@ -7,10 +7,16 @@ export interface VisibilityResult {
   firstMentionIndex: number | null;
 }
 
-export async function checkVisibility(responseText: string): Promise<VisibilityResult[]> {
-  const brands = await extractBrands(responseText);
+const TRACKED = ["Brooks", "Nike", "Adidas", "Hoka"];
 
-  return brands.map(brand => {
+// Checks the tracked brands plus any additional brands extracted by the LLM
+// and gathers visibility info for the union of those names.
+export async function checkVisibility(responseText: string): Promise<VisibilityResult[]> {
+  const extracted = await extractBrands(responseText).catch(() => []);
+
+  const names = Array.from(new Set([...TRACKED, ...extracted]));
+
+  return names.map(brand => {
     const escaped = brand.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const regex = new RegExp(`\\b${escaped}\\b`, "gi");
     const matches = [...responseText.matchAll(regex)];

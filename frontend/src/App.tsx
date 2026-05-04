@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { type Simulation, runSimulation, getSimulations } from "./api/client";
+import { type Simulation, runSimulation, getSimulations, deleteSimulation } from "./api/client";
 import PromptInput from "./components/PromptInput";
 import SimulationResults from "./components/SimulationResults";
 import SimulationHistory from "./components/SimulationHistory";
@@ -88,6 +88,16 @@ export default function App() {
     setShowResponse(false);
   };
 
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteSimulation(id);
+      setHistory(prev => prev.filter(s => s.id !== id));
+      if (current?.id === id) setCurrent(null);
+    } catch (e) {
+      console.error("Failed to delete simulation", e);
+    }
+  };
+
   // ── HOME ──────────────────────────────────────────────────────────────────
   if (view === "home") {
     return (
@@ -132,6 +142,7 @@ export default function App() {
           simulations={history}
           currentId={current?.id}
           onSelect={handleHistorySelect}
+          onDelete={handleDelete}
         />
       </div>
     );

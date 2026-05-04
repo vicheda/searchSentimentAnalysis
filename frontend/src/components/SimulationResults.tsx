@@ -37,7 +37,6 @@ function attributeScoreLabel(attribute?: BrandAttribute): string {
 
 function ComparisonTable({ brands }: { brands: BrandResult[] }) {
   const visible = [...brands]
-    .filter(b => b.isVisible)
     .sort((a, b) => (a.firstMentionIndex ?? Infinity) - (b.firstMentionIndex ?? Infinity));
 
   if (visible.length === 0) return null;
@@ -114,7 +113,6 @@ function ComparisonTable({ brands }: { brands: BrandResult[] }) {
 
 function AttributeComparisonTable({ brands }: { brands: BrandResult[] }) {
   const visible = [...brands]
-    .filter(b => b.isVisible)
     .sort((a, b) => (a.firstMentionIndex ?? Infinity) - (b.firstMentionIndex ?? Infinity));
 
   const attributeNames = [...new Set(
@@ -178,17 +176,30 @@ function BrooksGapAnalysis({
   brands: BrandResult[];
   rawResponse: string;
 }) {
-  const visible = [...brands]
-    .filter(b => b.isVisible)
-    .sort((a, b) => (a.firstMentionIndex ?? Infinity) - (b.firstMentionIndex ?? Infinity));
-  const brooks = brands.find(b => b.brandName === "Brooks");
-  const topBrand = visible[0];
+  const ordered = [...brands].sort((a, b) => {
+    if (a.isVisible !== b.isVisible) return a.isVisible ? -1 : 1;
+    const aIndex = a.firstMentionIndex ?? Infinity;
+    const bIndex = b.firstMentionIndex ?? Infinity;
+    if (aIndex !== bIndex) return aIndex - bIndex;
+    return a.brandName.localeCompare(b.brandName);
+  });
 
-  if (!brooks || !topBrand) return null;
+  const visible = ordered.filter(b => b.isVisible);
+  const brooks = brands.find(b => b.brandName === "Brooks") ?? {
+    brandName: "Brooks",
+    isVisible: false,
+    mentionCount: 0,
+    firstMentionIndex: null,
+    sentimentScore: null,
+    sentimentLabel: null,
+    scoringMethod: null,
+    attributes: []
+  };
+  const topBrand = visible[0] ?? ordered[0];
 
-  const brooksRank = brooks.isVisible
-    ? visible.findIndex(b => b.brandName === "Brooks") + 1
-    : 0;
+  if (!topBrand) return null;
+
+  const brooksRank = ordered.findIndex(b => b.brandName === "Brooks") + 1 || 1;
   const mentionGap = Math.max(0, topBrand.mentionCount - brooks.mentionCount);
   const attributeGap = Math.max(0, topBrand.attributes.length - brooks.attributes.length);
   const scoreGap =
@@ -266,6 +277,13 @@ function BrooksGapAnalysis({
         </div>
       )}
 
+      {quotes.length === 0 && (
+        <div className="gap-copy">
+          <div className="gap-copy-label">Representative quotes</div>
+          <div className="quote-note">Brooks was not explicitly mentioned in the raw response, so there are no Brooks quotes to extract.</div>
+        </div>
+      )}
+
       <div className="gap-copy">
         <div className="gap-copy-label">Trend-aligned ways to improve</div>
         <ul className="gap-list">
@@ -279,18 +297,16 @@ function BrooksGapAnalysis({
 }
 
 export default function SimulationResults({ simulation }: Props) {
-  const visibleBrands = [...simulation.brandResults]
-    .filter(b => b.isVisible)
-    .sort((a, b) => (a.firstMentionIndex ?? Infinity) - (b.firstMentionIndex ?? Infinity));
-
-  const invisibleBrands = [...simulation.brandResults]
-    .filter(b => !b.isVisible)
-    .sort((a, b) => a.brandName.localeCompare(b.brandName));
-
-  const sorted = [...visibleBrands, ...invisibleBrands];
+  const sorted = [...simulation.brandResults].sort((a, b) => {
+    if (a.isVisible !== b.isVisible) return a.isVisible ? -1 : 1;
+    const aIndex = a.firstMentionIndex ?? Infinity;
+    const bIndex = b.firstMentionIndex ?? Infinity;
+    if (aIndex !== bIndex) return aIndex - bIndex;
+    return a.brandName.localeCompare(b.brandName);
+  });
 
   const getRank = (brandName: string) => {
-    const idx = visibleBrands.findIndex(b => b.brandName === brandName);
+    const idx = sorted.findIndex(b => b.brandName === brandName);
     return idx === -1 ? 0 : idx + 1;
   };
 

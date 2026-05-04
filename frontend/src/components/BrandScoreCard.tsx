@@ -5,25 +5,12 @@ const BRAND_COLORS: Record<string, string> = {
   Nike:         "#c8940a",
   Adidas:       "#6b7280",
   Hoka:         "#9ca3af",
-  ASICS:        "#3b82f6",
-  "New Balance": "#7c3aed",
-  Saucony:      "#dc2626",
-  Mizuno:       "#0891b2",
-  Salomon:      "#d97706",
-  Altra:        "#059669",
-  Puma:         "#db2777",
-  Reebok:       "#4f46e5",
-  "Under Armour": "#1d4ed8",
-  Newton:       "#b45309",
 };
 
-// Generate a stable color for unknown brands based on name hash
+const FALLBACK_BRAND_COLOR = "#9ca3af";
+
 function brandColor(name: string): string {
-  if (BRAND_COLORS[name]) return BRAND_COLORS[name];
-  const palette = ["#6366f1", "#f59e0b", "#10b981", "#ef4444", "#8b5cf6", "#06b6d4", "#84cc16", "#f97316"];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) & 0xffff;
-  return palette[hash % palette.length];
+  return BRAND_COLORS[name] ?? FALLBACK_BRAND_COLOR;
 }
 
 interface Props {
@@ -53,7 +40,7 @@ export default function BrandScoreCard({ result, rank }: Props) {
         {result.isVisible ? formatScore(result.sentimentScore) : "—"}
       </span>
       <span className="visibility-info">
-        {result.isVisible ? `visible · #${rank}` : "not mentioned"}
+        {result.isVisible ? "mentioned" : "not mentioned"} · #{rank}
       </span>
     </div>
   );

@@ -4,6 +4,7 @@ interface Props {
   simulations: Simulation[];
   currentId?: string;
   onSelect: (sim: Simulation) => void;
+  onDelete?: (id: string) => void;
 }
 
 function formatScore(score: number | null): string {
@@ -103,7 +104,7 @@ function BrooksSummary({ simulations }: { simulations: Simulation[] }) {
   );
 }
 
-export default function SimulationHistory({ simulations, currentId, onSelect }: Props) {
+export default function SimulationHistory({ simulations, currentId, onSelect, onDelete }: Props) {
   if (simulations.length === 0) {
     return (
       <div className="history-empty">No searches yet. Run a simulation to get started.</div>
@@ -123,13 +124,20 @@ export default function SimulationHistory({ simulations, currentId, onSelect }: 
             const isActive = sim.id === currentId;
 
             return (
-              <button
+              <div
                 key={sim.id}
                 className={`history-card${isActive ? " active" : ""}`}
                 onClick={() => onSelect(sim)}
               >
                 <div className="hc-top">
                   <span className="hc-prompt">{sim.prompt}</span>
+                  <button
+                    className="delete-btn"
+                    onClick={(e) => { e.stopPropagation(); onDelete?.(sim.id); }}
+                    aria-label={`Delete simulation ${sim.id}`}
+                  >
+                    ×
+                  </button>
                   <span className={`hc-score ${brooks?.sentimentLabel ?? ""}`}>
                     Brooks {brooks?.isVisible ? formatScore(brooks.sentimentScore) : "—"}
                   </span>
@@ -145,7 +153,7 @@ export default function SimulationHistory({ simulations, currentId, onSelect }: 
                     {new Date(sim.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </span>
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>

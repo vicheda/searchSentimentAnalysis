@@ -86,4 +86,29 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+router.delete("/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    // Find brand result ids for this simulation
+    const results = await prisma.brandResult.findMany({ where: { simulationId: id }, select: { id: true } });
+    const resultIds = results.map(r => r.id);
+
+    if (resultIds.length > 0) {
+      // Delete attributes first
+      await prisma.brandAttribute.deleteMany({ where: { brandResultId: { in: resultIds } } });
+      // Delete brand results
+      await prisma.brandResult.deleteMany({ where: { simulationId: id } });
+    }
+
+    // Delete the simulation
+    await prisma.simulation.delete({ where: { id } });
+
+    res.json({ success: true, id });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;
